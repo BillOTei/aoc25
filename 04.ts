@@ -51,15 +51,26 @@ const reachables = (map: string[][]): Roll[] => {
 
 async function p2025day4_part1(input: string, ...params: any[]) {
 	const map: string[][] = input.split("\n").map(l => l.split(""));
-	const depth = map.length;
-	const width = map[0].length;
 	const res = reachables(map);
 
 	return `${res.length}`;
 }
 
 async function p2025day4_part2(input: string, ...params: any[]) {
-	return "Not implemented";
+	let map: string[][] = input.split("\n").map(l => l.split(""));
+	let reachableRolls = [];
+	let res = 0;
+	reachableRolls = reachables(map);
+	res += reachableRolls.length;
+	while (reachableRolls.length > 0) {
+		reachableRolls.forEach(r => {
+			map[r.y][r.x] = ".";
+		});
+		reachableRolls = reachables(map);
+		res += reachableRolls.length;
+	}
+
+	return `${res}`;
 }
 
 async function run() {
@@ -78,7 +89,21 @@ async function run() {
 			expected: "13",
 		},
 	];
-	const part2tests: TestCase[] = [];
+	const part2tests: TestCase[] = [
+		{
+			input: `..@@.@@@@.
+@@@.@.@.@@
+@@@@@.@.@@
+@.@@@@..@.
+@@.@@@@.@@
+.@@@@@@@.@
+.@.@.@.@@@
+@.@@@.@@@@
+.@@@@@@@@.
+@.@.@@@.@.`,
+			expected: "43",
+		}
+	];
 
 	const [p1testsNormalized, p2testsNormalized] = normalizeTestCases(part1tests, part2tests);
 
