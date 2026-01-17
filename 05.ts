@@ -9,10 +9,6 @@ import { normalizeTestCases } from "../../../util/test";
 const YEAR = 2025;
 const DAY = 5;
 
-// solution path: /Users/alexandre.teilhet/IdeaProjects/advent-of-code25/years/2025/05/index.ts
-// data path    : /Users/alexandre.teilhet/IdeaProjects/advent-of-code25/years/2025/05/data.txt
-// problem url  : https://adventofcode.com/2025/day/5
-
 async function p2025day5_part1(input: string, ...params: any[]) {
 	const [freshRanges, spoilt] = input.split("\n\n").map(l => l.split("\n"));
 	const isFresh = (r: string, id: string): boolean => {
