@@ -9,10 +9,6 @@ import { normalizeTestCases } from "../../../util/test";
 const YEAR = 2025;
 const DAY = 6;
 
-// solution path: /Users/alexandre.teilhet/IdeaProjects/advent-of-code25/years/2025/06/index.ts
-// data path    : /Users/alexandre.teilhet/IdeaProjects/advent-of-code25/years/2025/06/data.txt
-// problem url  : https://adventofcode.com/2025/day/6
-
 async function p2025day6_part1(input: string, ...params: any[]) {
 	let res = 0;
 	const rows = input.split("\n");
