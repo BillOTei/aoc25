@@ -9,10 +9,6 @@ import { normalizeTestCases } from "../../../util/test";
 const YEAR = 2025;
 const DAY = 2;
 
-// solution path: /Users/alexandre.teilhet/IdeaProjects/advent-of-code25/years/2025/02/index.ts
-// data path    : /Users/alexandre.teilhet/IdeaProjects/advent-of-code25/years/2025/02/data.txt
-// problem url  : https://adventofcode.com/2025/day/2
-
 async function p2025day2_part1(input: string, ...params: any[]) {
 	const isValid = (id: string): boolean => {
 		if (id.charAt(0) === "0") {
