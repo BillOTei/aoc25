@@ -9,10 +9,6 @@ import { normalizeTestCases } from "../../../util/test";
 const YEAR = 2025;
 const DAY = 4;
 
-// solution path: /Users/alexandre.teilhet/IdeaProjects/advent-of-code25/years/2025/04/index.ts
-// data path    : /Users/alexandre.teilhet/IdeaProjects/advent-of-code25/years/2025/04/data.txt
-// problem url  : https://adventofcode.com/2025/day/4
-
 interface Roll {
 	x: number;
 	y: number;
