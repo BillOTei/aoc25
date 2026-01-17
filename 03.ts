@@ -9,10 +9,6 @@ import { normalizeTestCases } from "../../../util/test";
 const YEAR = 2025;
 const DAY = 3;
 
-// solution path: /Users/alexandre.teilhet/IdeaProjects/advent-of-code25/years/2025/03/index.ts
-// data path    : /Users/alexandre.teilhet/IdeaProjects/advent-of-code25/years/2025/03/data.txt
-// problem url  : https://adventofcode.com/2025/day/3
-
 async function p2025day3_part1(input: string, ...params: any[]) {
 	const findMax = (listStr: string): number => {
 		const list = listStr.split("");
