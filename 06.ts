@@ -1,4 +1,4 @@
-import _ from "lodash";
+import _, { flip } from "lodash";
 import * as util from "../../../util/util";
 import * as test from "../../../util/test";
 import chalk from "chalk";
@@ -8,6 +8,10 @@ import { normalizeTestCases } from "../../../util/test";
 
 const YEAR = 2025;
 const DAY = 6;
+
+// solution path: /Users/alexandre.teilhet/IdeaProjects/advent-of-code25/years/2025/06/index.ts
+// data path    : /Users/alexandre.teilhet/IdeaProjects/advent-of-code25/years/2025/06/data.txt
+// problem url  : https://adventofcode.com/2025/day/6
 
 async function p2025day6_part1(input: string, ...params: any[]) {
 	let res = 0;
@@ -19,94 +23,84 @@ async function p2025day6_part1(input: string, ...params: any[]) {
 	for (let index = 0; index < inverted.length; index++) {
 		const elements = inverted[index];
 		const op = operations[index];
-		const calculus = elements.reduce((acc, e) => (op === "+" ? acc + e : acc * e), op === "+" ? 0 : 1);
-		res += calculus;
+		res += elements.reduce((acc, e) => (op === "+" ? acc + e : acc * e), op === "+" ? 0 : 1);
 	}
 
 	return `${res}`;
 }
 
 async function p2025day6_part2(input: string, ...params: any[]) {
-	let res = 0;
-	const groupSize = 3;
+	type Cell = { text: string; start: number };
+
+	const parseByColumnsKeepingPadding = (src: string): string[][] => {
+		const lines = src
+			.replace(/\r\n/g, "\n")
+			.split("\n")
+			.filter(l => l.length > 0);
+
+		// Extract tokens + their start index per line
+		const rows: Cell[][] = lines.map(line => {
+			const cells: Cell[] = [];
+			for (const m of line.matchAll(/\S+/g)) {
+				cells.push({ text: m[0], start: m.index ?? 0 });
+			}
+			return cells;
+		});
+
+		const colCount = Math.max(...rows.map(r => r.length));
+
+		// Max width per column (by token length)
+		const maxLen: number[] = Array.from({ length: colCount }, (_, c) =>
+			Math.max(...rows.map(r => r[c]?.text.length ?? 0))
+		);
+
+		// Decide alignment per column from start positions
+		// if start positions vary -> right aligned; else left aligned
+		const rightAligned: boolean[] = Array.from({ length: colCount }, (_, c) => {
+			const starts = rows.map(r => r[c]?.start).filter((v): v is number => typeof v === "number");
+			return new Set(starts).size > 1;
+		});
+
+		// Pad each cell to maxLen using inferred alignment
+		const paddedRows: string[][] = rows.map(r =>
+			Array.from({ length: colCount }, (_, c) => {
+				const t = r[c]?.text ?? "";
+				return rightAligned[c] ? t.padStart(maxLen[c], " ") : t.padEnd(maxLen[c], " ");
+			})
+		);
+
+		// Transpose rows -> columns
+		const columns: string[][] = Array.from({ length: colCount }, (_, c) => paddedRows.map(r => r[c]));
+
+		return columns;
+	};
 	let rows = input.split("\n");
 	const operations = rows[rows.length - 1].split(/\s+/gm);
-	delete rows[rows.length - 1];
-	const numbers = rows.map(l => {
-		const list = l.split("");
-		let res = [];
-		let curr = "";
-		const len = list.length;
-		for (let i = 0; i < len; i++) {
-			const element = list[i];
-			if (curr.length === groupSize) {
-				res.push(curr);
-				curr = "";
-			} else if (i === len - 1) {
-				res.push(curr.concat(element));
-			} else {
-				curr = curr.concat(element);
-			}
-		}
-		return res;
-	});
-	const inverted = numbers[0].map((_, colIndex) => numbers.map(row => row[colIndex].split("").reverse().join("")));
-	const getNumberAtIndex = (pos: number, idx: number, elements: string[]): string => {
-		const list = elements.slice(pos);
-
-		return list.reduce((acc, d) => (d.charAt(idx) ? acc.concat(d.charAt(idx)) : acc), String(""));
-	};
-	interface Longest {
-		v: string;
-		pos: number;
-	}
-	const findLongest = (l: string[]): Longest => {
-		let pos = 0;
-		let v = "";
-		for (let index = 0; index < l.length; index++) {
-			const element = l[index];
-			if (element && element.length > v.length) {
-				v = element;
-				pos = index;
-			}
-		}
-
-		return { v, pos };
-	};
-
-	const test = getNumberAtIndex(0, 2, inverted[2]);
-
-	for (let index = 0; index < inverted.length; index++) {
-		const elements = inverted[index];
-		const op = operations[index];
-		let calculus = 0;
-
-		const [v1, v2, v3, v4] = elements;
-		const longest = findLongest(elements);
-		let numbers = [];
-		for (let d = 0; d < v1.length; d++) {
-			numbers.push(getNumberAtIndex(0, d, elements));
-		}
-		if (v1.length < v2.length) {
-			for (let d = v1.length; d < v2.length; d++) {
-				numbers.push(getNumberAtIndex(1, d, elements));
-			}
-		}
-		if (v2.length < v3.length) {
-			for (let d = v2.length; d < v3.length; d++) {
-				numbers.push(getNumberAtIndex(2, d, elements));
-			}
-		}
-
-		if (v4) {
-			if (v3.length < v4.length) {
-				for (let d = v3.length; d < v4.length; d++) {
-					numbers.push(getNumberAtIndex(3, d, elements));
+	let parsed = parseByColumnsKeepingPadding(input);
+	parsed.forEach(l => l.pop());
+	let res = 0;
+	const flipped = parsed.map(col => {
+		const maxLen = col.reduce(
+			(acc, v, x) =>
+				(col[x - 1] ?? "").length > v.replace(/\s+/g, "").length ? acc : v.replace(/\s+/g, "").length,
+			0
+		);
+		let flippedSeq = [];
+		for (let i = 0; i < maxLen; i++) {
+			let acc = "";
+			col.forEach(v => {
+				if (v.charAt(i)) {
+					acc = acc.concat(v.charAt(i));
 				}
-			}
+			});
+			flippedSeq.push(acc);
 		}
 
-		const l = "";
+		return flippedSeq;
+	});
+	for (const [i, l] of flipped.entries()) {
+		const op = operations[i];
+		res += l.reduce((acc, v) => (op === "+" ? acc + Number(v) : acc * Number(v)), op === "+" ? 0 : 1);
 	}
 
 	return `${res}`;
